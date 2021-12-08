@@ -1,3 +1,4 @@
+void limit(int value, int inf, int sup) {
 	if (value < inf) {value = inf;}
 	if (value > sup) {value = sup;}
 }
