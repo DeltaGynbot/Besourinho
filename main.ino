@@ -1,6 +1,10 @@
-void limit(int value, int inf, int sup) {
+static void limit(int &value, int inf, int sup) {
 	if (value < inf) {value = inf;}
 	if (value > sup) {value = sup;}
+}
+
+static void module(int number) {
+	return number > 0 ? number : -number;
 }
 
 class Ultrasonic {
@@ -155,6 +159,71 @@ Obstacle    obstacle      = Obstacle(8);
 Inclination inclination   = Inclination(9);
 Infrared    infrared[2]   = {Infrared(A0), Infrared(A1)};
 Ultasonic   ultrasonic[2] = {Ultrasonic(A2, A3), Ultrasonic(A4, A5)};
+
+// ---------- Variables
+
+int range[2];
+
+// ---------- Functions
+
+void move(int velocity) {
+	motor[0].write(velocity);
+	motor[1].write(velocity);
+}
+
+void move(int left, int right) {
+	motor[0].write(left);
+	motor[1].write(right);
+}
+
+void rotate(int angle, int velocity) {
+	int value = 1000; // Need Calibrate
+
+	int time = map(angle, 0, 360, 0, value);
+
+	if (angle < 0) {
+		move(-velocity, velocity);
+	}
+	else {
+		move(velocity, -velocity);
+	}
+	
+	millis(time);
+
+	move(0);
+}
+
+int normalize(int &left, int &right) {
+	// Suppose mapping (black, white) -> (0, 100)
+
+	if (value < range[0]) {return 1;}
+	if (value < range[1]) {return 2;}
+
+	return 0;
+}
+
+int error() {
+	int left  = normalize(infrared[0].read());
+	int right = normalize(infrared[1].read());
+
+	if (left == right) {
+		if (left == 2) {return 3;}
+		if (left != 2) {return 0;}
+	}
+	else {
+		if (left  == 2) {return -2;}
+		if (right == 2) {return  2;}
+
+		if (left  == 1) {return -1;}
+		if (right == 1) {return  1;}
+	}
+
+	return 0;
+}
+
+void curve() {
+
+}
 
 void setup() {}
 
