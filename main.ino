@@ -3,7 +3,7 @@ static void limit(int &value, int inf, int sup) {
 	if (value > sup) {value = sup;}
 }
 
-static void module(int number) {
+static int module(int number) {
 	return number > 0 ? number : -number;
 }
 
