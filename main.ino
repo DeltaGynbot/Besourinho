@@ -158,7 +158,7 @@ Motor motor[2] = {Motor(5, 6), Motor(10, 11)};
 Obstacle    obstacle      = Obstacle(8);
 Inclination inclination   = Inclination(9);
 Infrared    infrared[2]   = {Infrared(A0), Infrared(A1)};
-Ultrasonic   ultrasonic[2] = {Ultrasonic(A2, A3), Ultrasonic(A4, A5)};
+Ultrasonic  ultrasonic[2] = {Ultrasonic(A2, A3), Ultrasonic(A4, A5)};
 
 // ---------- Variables
 
