@@ -166,6 +166,30 @@ int range[2] = {30, 80};
 
 // ---------- Functions
 
+int print(int message) {
+  Serial.begin(9600);
+  Serial.print(message);
+  Serial.end();
+}
+
+int println(int message) {
+  Serial.begin(9600);
+  Serial.println(message);
+  Serial.end();
+}
+
+int print(String message) {
+  Serial.begin(9600);
+  Serial.print(message);
+  Serial.end();
+}
+
+int println(String message) {
+  Serial.begin(9600);
+  Serial.println(message);
+  Serial.end();
+}
+
 void move(int velocity) {
 	motor[0].write(velocity);
 	motor[1].write(velocity);
