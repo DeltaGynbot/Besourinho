@@ -72,7 +72,7 @@ class Infrared {
 		}
 
 		int read() {
-			return map(analogRead(output), 0, 1023, 0, 100);
+			return map(analogRead(output), 0, 1023, 100, 0);
 		}
 };
 
@@ -158,11 +158,11 @@ Motor motor[2] = {Motor(5, 6), Motor(10, 11)};
 Obstacle    obstacle      = Obstacle(8);
 Inclination inclination   = Inclination(9);
 Infrared    infrared[2]   = {Infrared(A0), Infrared(A1)};
-Ultasonic   ultrasonic[2] = {Ultrasonic(A2, A3), Ultrasonic(A4, A5)};
+Ultrasonic   ultrasonic[2] = {Ultrasonic(A2, A3), Ultrasonic(A4, A5)};
 
 // ---------- Variables
 
-int range[2];
+int range[2] = {30, 80};
 
 // ---------- Functions
 
@@ -188,12 +188,12 @@ void rotate(int angle, int velocity) {
 		move(velocity, -velocity);
 	}
 	
-	millis(time);
+	delay(time);
 
 	move(0);
 }
 
-int normalize(int &left, int &right) {
+int normalize(int value) {
 	// Suppose mapping (black, white) -> (0, 100)
 
 	if (value < range[0]) {return 1;}
@@ -221,9 +221,7 @@ int error() {
 	return 0;
 }
 
-void curve() {
-
-}
+void curve() {}
 
 void setup() {}
 
