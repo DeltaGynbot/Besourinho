@@ -7,6 +7,10 @@ static int module(int number) {
 	return number > 0 ? number : -number;
 }
 
+static int signal(int number) {
+	return number > 0 ? 1 : -1;
+}
+
 class Ultrasonic {
 	public:
 		int trigger;
@@ -114,6 +118,8 @@ class Motor {
 		int controll;
 		int controlr;
 
+		int velocity;
+
 		Motor(int _controll, int _controlr) {
 			controll = _controll;
 			controlr = _controlr;
@@ -122,7 +128,9 @@ class Motor {
 			pinMode(controlr, OUTPUT); digitalWrite(controlr, LOW);
 		}
 		
-		void write(int velocity) {
+		void write(int _velocity) {
+			velocity = _velocity;
+
 			limit(velocity, -100, 100);
 
 			short int inputl = 0;
@@ -138,6 +146,10 @@ class Motor {
 			analogWrite(controll, inputl);	
 			analogWrite(controlr, inputr);
 		}
+
+		int read() {
+			return velocity;
+		}
 };
 
 // ---------- Actuators Declaration
@@ -146,7 +158,7 @@ class Motor {
 // Motor: (5, 6), (10, 11) 
 
 Servo servo[2] = {Servo(2), Servo(3)};
-Motor motor[2] = {Motor(5, 6), Motor(10, 11)};
+Motor motor[2] = {Motor(5, 6), Motor(10, 11)}; // Left, Right
 
 // ---------- Sensors Declaration
 
@@ -157,8 +169,8 @@ Motor motor[2] = {Motor(5, 6), Motor(10, 11)};
 
 Obstacle    obstacle      = Obstacle(8);
 Inclination inclination   = Inclination(9);
-Infrared    infrared[2]   = {Infrared(A0), Infrared(A1)};
-Ultrasonic  ultrasonic[2] = {Ultrasonic(A2, A3), Ultrasonic(A4, A5)};
+Infrared    infrared[2]   = {Infrared(A0), Infrared(A1)};             // Left,    Right
+Ultrasonic  ultrasonic[2] = {Ultrasonic(A2, A3), Ultrasonic(A4, A5)}; // Frontal, Lateral
 
 // ---------- Variables
 
@@ -166,41 +178,47 @@ int range[2] = {30, 80};
 
 // ---------- Functions
 
-int print(int message) {
-  Serial.begin(9600);
-  Serial.print(message);
-  Serial.end();
+int print(int &message) {
+	Serial.begin(9600);
+	Serial.print(message);
+	Serial.end();
 }
 
-int println(int message) {
-  Serial.begin(9600);
-  Serial.println(message);
-  Serial.end();
+int println(int &message) {
+	Serial.begin(9600);
+	Serial.println(message);
+	Serial.end();
 }
 
-int print(String message) {
-  Serial.begin(9600);
-  Serial.print(message);
-  Serial.end();
+int print(String &message) {
+	Serial.begin(9600);
+	Serial.print(message);
+	Serial.end();
 }
 
-int println(String message) {
-  Serial.begin(9600);
-  Serial.println(message);
-  Serial.end();
+int println(String &message) {
+	Serial.begin(9600);
+	Serial.println(message);
+	Serial.end();
 }
 
-void move(int velocity) {
+void move(int &velocity) {
 	motor[0].write(velocity);
 	motor[1].write(velocity);
 }
 
-void move(int left, int right) {
+void move(int &left, int &right) {
 	motor[0].write(left);
 	motor[1].write(right);
 }
 
-void rotate(int angle, int velocity) {
+void advance(int time, int velocity = 100) {
+	move(velocity);
+
+	delay(time);	
+}
+
+void rotate(int angle, int velocity = 100) {
 	int value = 1000; // Need Calibrate
 
 	int time = map(angle, 0, 360, 0, value);
@@ -218,12 +236,10 @@ void rotate(int angle, int velocity) {
 }
 
 int normalize(int value) {
-	// Suppose mapping (black, white) -> (0, 100)
+	if (value < range[0]) {return 1;} // if black
+	if (value < range[1]) {return 2;} // if signal
 
-	if (value < range[0]) {return 1;}
-	if (value < range[1]) {return 2;}
-
-	return 0;
+	return 0; // if white
 }
 
 int error() {
@@ -245,7 +261,38 @@ int error() {
 	return 0;
 }
 
-void curve() {}
+void curve() {
+	int deviation = error();
+
+	if (deviation != 0) {
+		int left  = motor[0].read();
+		int right = motor[1].read();
+
+		int angle = signal(deviation);
+
+		int velocity = 100;
+
+		switch (module(deviation)) {
+			case 1:
+				angle *= 5;
+				break;
+			case 2:
+				angle *= 60;
+				break;
+			case 3:
+				angle = 180;
+				break;
+		}
+
+		rotate(angle, velocity)
+
+		move(left, right);
+	}
+}
+
+void coc() {
+	int distance = obstacle.read();
+}
 
 void setup() {}
 
