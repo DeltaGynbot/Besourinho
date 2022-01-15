@@ -25,6 +25,10 @@ class Ultrasonic {
 
 			digitalWrite(trigger, LOW);
 		}
+
+		void disable() {
+			digitalWrite(trigger, LOW);
+		}
 		
 		int read() {
 			digitalWrite(trigger, HIGH); // the trigger pin send a signal
@@ -93,6 +97,10 @@ class Servo {
 			digitalWrite(control, LOW);
 		}
 
+		void disable() {
+			digitalWrite(control, LOW);
+		}
+
 		void write(int angle) {
 			limit(angle, 0, 180);
 
@@ -126,6 +134,11 @@ class Motor {
 			
 			pinMode(controll, OUTPUT); digitalWrite(controll, LOW);
 			pinMode(controlr, OUTPUT); digitalWrite(controlr, LOW);
+		}
+		
+		void disable() {
+			digitalWrite(controll, LOW);
+			digitalWrite(controlr, LOW);
 		}
 		
 		void write(int _velocity) {
@@ -202,12 +215,12 @@ int println(String &message) {
 	Serial.end();
 }
 
-void move(int &velocity) {
+void move(int velocity = 100) {
 	motor[0].write(velocity);
 	motor[1].write(velocity);
 }
 
-void move(int &left, int &right) {
+void move(int left, int right) {
 	motor[0].write(left);
 	motor[1].write(right);
 }
@@ -290,10 +303,67 @@ void curve() {
 	}
 }
 
-void coc() {
+// --------------- Incomplete
+void dodge() {
 	int distance = obstacle.read();
+
+	int radius = 10;
+
+	if (distance < radius) {
+		int left  = motor[0].read();
+		int right = motor[1].read();
+
+		int _left  = 10;
+		int _right = ((radius + 15) / radius) * _left;
+
+		move(left, right);
+	}
+}
+
+bool arrived() {
+	if (inclination.read()) {
+		if (ultrasonic[1].read() < 10) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void end() {
+	ultrasonic[0].disable();
+	ultrasonic[1].disable();
+
+	servo[0].disable();
+	servo[1].disable();
+
+	motor[0].disable();
+	motor[1].disable();
+
+	while (true);
+}
+
+void route() {
+	while (true) {
+		
+
+		if (arrived()) {
+			break;
+		}
+	}
+}
+
+void rescue() {
+	while (true) {
+
+	}
+
+	end();
 }
 
 void setup() {}
 
-void loop() {}
+void loop() {
+	route();
+	rescue();
+}
