@@ -1,3 +1,3 @@
 # Estágio em Eletrônica
 
-Códigos dos projetos referentes ao est
+Códigos dos projetos referentes ao estagio
