@@ -185,27 +185,34 @@ Infrared    infrared[2]   = {Infrared(A4), Infrared(A5)};             // Left,  
 Ultrasonic  ultrasonic[2] = {Ultrasonic(A0, A1), Ultrasonic(A2, A3)}; // Frontal, Lateral
 
 // ---------- Functions
-/*
-int print(int message) {
-	Serial.print(message);
-}
-
-int println(int message) {
-	Serial.println(message);
-}
-
-int print(String message) {
-	Serial.print(message);
-}
-
-int println(String message) {
-	Serial.println(message);
-}
-*/
 
 void move(int left, int right) {
 	motor[0].write(left);
 	motor[1].write(right);
+}
+
+void rotate(int velocity) {
+	motor[0].write(velocity);
+	motor[1].write(-velocity);
+}
+
+void walk(int velocity, int time) {
+	motor[0].write(velocity);
+	motor[1].write(velocity);
+
+	delay(time);
+
+	motor[0].write(0);
+	motor[1].write(0);
+
+	delay(time);
+}
+
+void stop(int time) {
+	motor[0].write(0);
+	motor[1].write(0);
+
+	delay(time);
 }
 
 int error() {
@@ -215,65 +222,85 @@ int error() {
 	return right - left;
 }
 
-void curve() {
-	int detour = error();
+int deviation(int step) {
+	int detour;
 
-	int time;
+	int detours[] = {0, 0, 0};
+
+	while (step > 0) {
+		detour = error();
+
+		detours[detour + 1]++;
+
+		step--;
+	}
+
+	int result;	
+
+	while (step < 3) {
+		if (detours[step] > detour) {
+			detour = detours[step];
+
+			result = step - 1;
+		}
+
+		step++;
+	}
+
+	return result;
+}
+
+void adjust(int steps) {
+	int detour;
+	int step;
+
+	bool out = true;
+	
+	while (true) {
+		step = 0;
+
+		while (step < steps) {
+			detour = error();
+			
+			if (detour) {
+				out = false;
+			}
+
+			step++;
+		}
+
+		if (out) {
+			break;
+		}
+	}
+}
+
+void curve() {
+	int detour = deviation(20);
+
 	int velocity;
 
 	if (detour) {
-		time = 50;
-		velocity = 100;
+		stop(200);
 
-		int left  = detour > 0 ? velocity : -velocity;
-		int right = detour < 0 ? -velocity : velocity;
+		if (detour > 0) velocity =  70;
+		if (detour < 0) velocity = -70;
 
-		move(left, right);
+		rotate(velocity);
 
-		int step = 0;
+		adjust(100);
+		stop(200);
 
-		while (true) {
-			delay(time);
-			
-			if (!error()) {
-				for (step = 0; step < 100; step++) {
-					if (!error()) {
-						
-					}
-				}
-				break;
-			}
-		}
+		walk(50, 50);
 	}
 	else {
-		time = 50;
 		velocity = 50;
 
-		move(velocity, velocity);
-
-		delay(time);
-		move(0, 0);
-		delay(time);
+		walk(velocity, 10);
 	}
-
-	/*
-	switch (detour) {
-		case 0:
-			move(50, 50);
-			break;
-		case -1:
-			move(0, 100);
-			break;
-		case 1:
-			move(100, 0);
-			break;
-	}
-	*/
 }
 
-void dodge() {
-	if ()
-}
+void dodge() {}
 
 void route() {
 	while (true) {
